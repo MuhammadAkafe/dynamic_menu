@@ -6,6 +6,7 @@ export async function POST(request: NextRequest) {
   try {
     const { email, password } = await request.json();
 
+    // Validate input
     if (!email || !password) {
       return NextResponse.json(
         { error: 'Email and password are required' },
@@ -13,8 +14,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Sanitize email
+    const sanitizedEmail = String(email).trim().toLowerCase();
+    if (!sanitizedEmail || !sanitizedEmail.includes('@')) {
+      return NextResponse.json(
+        { error: 'Invalid email format' },
+        { status: 400 }
+      );
+    }
+
     const user = await prisma.user.findUnique({
-      where: { email },
+      where: { email: sanitizedEmail },
     });
 
     if (!user) {
@@ -24,7 +34,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const isValidPassword = await bcrypt.compare(password, user.password);
+    const isValidPassword = await bcrypt.compare(String(password), user.password);
 
     if (!isValidPassword) {
       return NextResponse.json(

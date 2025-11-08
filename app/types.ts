@@ -13,8 +13,3 @@ export interface MenuItem {
   category: Category;
 }
 
-export interface User {
-  email: string;
-  password: string;
-}
-

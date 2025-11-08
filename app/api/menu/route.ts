@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '../../../lib/prisma';
 import { Category, CategoryName } from '../../types';
+import { categories as categoriesArray } from '../../category';
+
+// Convert categories array to Record for quick lookup
+const categories: Record<CategoryName, Category> = categoriesArray.reduce((acc, category) => {
+  acc[category.name] = category;
+  return acc;
+}, {} as Record<CategoryName, Category>);
 
 // GET - Fetch all menu items
 export async function GET() {
@@ -13,16 +20,34 @@ export async function GET() {
     });
 
     // Convert category strings to Category objects
-    const categories: Record<CategoryName, Category> = {
-      Grill: { id: 1, name: 'Grill' },
-      Salads: { id: 2, name: 'Salads' },
-      Drinks: { id: 3, name: 'Drinks' },
+    type PrismaMenuItem = {
+      id: string;
+      name: string;
+      description: string;
+      price: number;
+      category: string;
+      createdAt: Date;
+      updatedAt: Date;
     };
 
-    const formattedItems = menuItems.map((item) => ({
-      ...item,
-      category: categories[item.category as CategoryName] || { id: 0, name: item.category as CategoryName },
-    }));
+    type FormattedMenuItem = Omit<PrismaMenuItem, 'category'> & {
+      category: Category;
+    };
+
+    const formattedItems: FormattedMenuItem[] = menuItems
+      .map((item: PrismaMenuItem) => {
+        const categoryObj = categories[item.category as CategoryName];
+        if (!categoryObj) {
+          // Skip items with invalid categories or log a warning
+          console.warn(`Invalid category found: ${item.category} for item ${item.id}`);
+          return null;
+        }
+        return {
+          ...item,
+          category: categoryObj,
+        };
+      })
+      .filter((item: FormattedMenuItem | null): item is FormattedMenuItem => item !== null);
 
     return NextResponse.json(formattedItems, { status: 200 });
   } catch (error) {
@@ -52,33 +77,45 @@ export async function POST(request: NextRequest) {
       : category;
 
     // Validate category
-    const validCategories: CategoryName[] = ['Grill', 'Salads', 'Drinks'];
-    if (!validCategories.includes(categoryName as CategoryName)) {
+    const validCategoryNames = categoriesArray.map(c => c.name);
+    if (!validCategoryNames.includes(categoryName as CategoryName)) {
       return NextResponse.json(
         { error: 'Invalid category' },
         { status: 400 }
       );
     }
 
+    // Validate and parse price
+    const parsedPrice = parseFloat(price);
+    if (isNaN(parsedPrice) || parsedPrice <= 0) {
+      return NextResponse.json(
+        { error: 'Price must be a positive number' },
+        { status: 400 }
+      );
+    }
+
     const menuItem = await prisma.menuItem.create({
       data: {
-        name,
-        description,
-        price: parseFloat(price),
-        category: categoryName,
+        name: String(name).trim(),
+        description: String(description).trim(),
+        price: parsedPrice,
+        category: categoryName as CategoryName,
       },
     });
 
-    // Convert back to Category object for response
-    const categories: Record<CategoryName, Category> = {
-      Grill: { id: 1, name: 'Grill' },
-      Salads: { id: 2, name: 'Salads' },
-      Drinks: { id: 3, name: 'Drinks' },
-    };
+    // Get the category object - we know it exists because we validated it
+    const categoryObj = categories[categoryName as CategoryName];
+    if (!categoryObj) {
+      // This should never happen due to validation, but handle it safely
+      return NextResponse.json(
+        { error: 'Category lookup failed' },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json({
       ...menuItem,
-      category: categories[categoryName as CategoryName],
+      category: categoryObj,
     }, { status: 201 });
   } catch (error) {
     console.error('Error creating menu item:', error);

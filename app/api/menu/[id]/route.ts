@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '../../../../lib/prisma';
 import { Category, CategoryName } from '../../../types';
+import { categories as categoriesArray } from '../../../category';
+
+// Convert categories array to Record for quick lookup
+const categories: Record<CategoryName, Category> = categoriesArray.reduce((acc, category) => {
+  acc[category.name] = category;
+  return acc;
+}, {} as Record<CategoryName, Category>);
 
 // PUT - Update a menu item
 export async function PUT(
@@ -24,10 +31,19 @@ export async function PUT(
       : category;
 
     // Validate category
-    const validCategories: CategoryName[] = ['Grill', 'Salads', 'Drinks'];
-    if (!validCategories.includes(categoryName as CategoryName)) {
+    const validCategoryNames = categoriesArray.map(c => c.name);
+    if (!validCategoryNames.includes(categoryName as CategoryName)) {
       return NextResponse.json(
         { error: 'Invalid category' },
+        { status: 400 }
+      );
+    }
+
+    // Validate and parse price
+    const parsedPrice = parseFloat(price);
+    if (isNaN(parsedPrice) || parsedPrice <= 0) {
+      return NextResponse.json(
+        { error: 'Price must be a positive number' },
         { status: 400 }
       );
     }
@@ -35,23 +51,26 @@ export async function PUT(
     const menuItem = await prisma.menuItem.update({
       where: { id },
       data: {
-        name,
-        description,
-        price: parseFloat(price),
-        category: categoryName,
+        name: String(name).trim(),
+        description: String(description).trim(),
+        price: parsedPrice,
+        category: categoryName as CategoryName,
       },
     });
 
-    // Convert back to Category object for response
-    const categories: Record<CategoryName, Category> = {
-      Grill: { id: 1, name: 'Grill' },
-      Salads: { id: 2, name: 'Salads' },
-      Drinks: { id: 3, name: 'Drinks' },
-    };
+    // Get the category object - we know it exists because we validated it
+    const categoryObj = categories[categoryName as CategoryName];
+    if (!categoryObj) {
+      // This should never happen due to validation, but handle it safely
+      return NextResponse.json(
+        { error: 'Category lookup failed' },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json({
       ...menuItem,
-      category: categories[categoryName as CategoryName],
+      category: categoryObj,
     }, { status: 200 });
   } catch (error) {
     console.error('Error updating menu item:', error);
