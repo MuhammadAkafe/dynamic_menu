@@ -41,6 +41,8 @@ export function CategoryProvider({ children }: { children: ReactNode }) {
 
   const addCategory = async (category: Omit<Category, 'id'>) => {
     try {
+      console.log('Attempting to add category:', category);
+      
       const response = await fetch('/api/categories', {
         method: 'POST',
         headers: {
@@ -49,16 +51,52 @@ export function CategoryProvider({ children }: { children: ReactNode }) {
         body: JSON.stringify(category),
       });
 
+      console.log('Response status:', response.status, response.statusText);
+
       if (response.ok) {
         const newCategory = await response.json();
+        console.log('Category created successfully:', newCategory);
         setCategories((prev) => [...prev, newCategory]);
       } else {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to add category');
+        // Try to parse error response
+        let errorMessage = 'Failed to add category';
+        let errorCode = null;
+        
+        try {
+          const errorData = await response.json();
+          console.error('Error response data:', errorData);
+          errorMessage = errorData.error || errorMessage;
+          errorCode = errorData.errorCode;
+        } catch (parseError) {
+          // If response is not JSON, use status text
+          console.error('Failed to parse error response:', parseError);
+          errorMessage = response.statusText || `Server error (${response.status})`;
+        }
+        
+        // Include error code in message if available
+        if (errorCode) {
+          errorMessage = `${errorMessage} (Error Code: ${errorCode})`;
+        }
+        
+        throw new Error(errorMessage);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error adding category:', error);
-      throw error;
+      console.error('Error type:', error?.constructor?.name);
+      console.error('Error message:', error?.message);
+      
+      // Handle network errors
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        throw new Error('Network error: Unable to connect to server. Please check your internet connection.');
+      }
+      
+      // Re-throw with original message if it's already an Error
+      if (error instanceof Error) {
+        throw error;
+      }
+      
+      // Fallback for unknown errors
+      throw new Error(error?.message || 'An unexpected error occurred while adding the category');
     }
   };
 

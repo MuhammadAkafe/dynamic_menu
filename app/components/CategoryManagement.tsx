@@ -52,9 +52,21 @@ export default function CategoryManagement({ onCategoryChange }: CategoryManagem
       await refreshMenu();
       onCategoryChange?.();
     } catch (error: any) {
-      const errorMessage = language === 'ar'
-        ? error.message || 'فشل في حذف الفئة. يرجى المحاولة مرة أخرى.'
-        : error.message || 'Failed to delete category. Please try again.';
+      console.error('Delete category error:', error);
+      
+      let errorMessage = error?.message || 'Failed to delete category. Please try again.';
+      
+      // Translate common error messages
+      if (language === 'ar') {
+        if (errorMessage.includes('Network error') || errorMessage.includes('connect')) {
+          errorMessage = 'خطأ في الاتصال: لا يمكن الاتصال بالخادم. يرجى التحقق من اتصالك بالإنترنت.';
+        } else if (errorMessage.includes('database') || errorMessage.includes('Database')) {
+          errorMessage = 'خطأ في قاعدة البيانات. يرجى المحاولة مرة أخرى لاحقاً.';
+        } else if (!errorMessage.includes('فشل')) {
+          errorMessage = `فشل في حذف الفئة: ${errorMessage}`;
+        }
+      }
+      
       alert(errorMessage);
     }
   };
@@ -92,9 +104,25 @@ export default function CategoryManagement({ onCategoryChange }: CategoryManagem
       setShowCategoryForm(false);
       onCategoryChange?.();
     } catch (error: any) {
-      const errorMessage = language === 'ar'
-        ? error.message || 'فشل في حفظ الفئة. يرجى المحاولة مرة أخرى.'
-        : error.message || 'Failed to save category. Please try again.';
+      console.error('Category submit error:', error);
+      
+      // Extract error message
+      let errorMessage = error?.message || 'Failed to save category. Please try again.';
+      
+      // Translate common error messages
+      if (language === 'ar') {
+        if (errorMessage.includes('already exists') || errorMessage.includes('already exists')) {
+          errorMessage = 'فئة بهذا الاسم موجودة بالفعل';
+        } else if (errorMessage.includes('Network error') || errorMessage.includes('connect')) {
+          errorMessage = 'خطأ في الاتصال: لا يمكن الاتصال بالخادم. يرجى التحقق من اتصالك بالإنترنت.';
+        } else if (errorMessage.includes('database') || errorMessage.includes('Database')) {
+          errorMessage = 'خطأ في قاعدة البيانات. يرجى المحاولة مرة أخرى لاحقاً.';
+        } else if (!errorMessage.includes('فشل')) {
+          errorMessage = `فشل في حفظ الفئة: ${errorMessage}`;
+        }
+      }
+      
+      // Show error in alert (you can replace this with a toast notification later)
       alert(errorMessage);
     }
   };
