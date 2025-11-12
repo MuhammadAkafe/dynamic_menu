@@ -1,6 +1,7 @@
 'use client';
 
 import { MenuItem, Category, CategoryName } from '../types';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface MenuSectionProps {
   category: Category;
@@ -32,6 +33,7 @@ const categoryColors: Record<CategoryName, { bg: string; bgSimple: string; borde
 
 export default function MenuSection({ category, items, onClick, isSelected = false }: MenuSectionProps) {
   const colors = categoryColors[category.name];
+  const { language } = useLanguage();
 
   return (
     <div className="mb-16">
@@ -41,17 +43,17 @@ export default function MenuSection({ category, items, onClick, isSelected = fal
           onClick={onClick || undefined}
           className={`text-4xl font-extrabold ${colors.text} tracking-tight ${onClick ? 'cursor-pointer hover:scale-105' : ''} transition-all duration-200 ${isSelected ? 'ring-4 ring-offset-4 rounded-xl px-4 py-2 shadow-lg' : ''}`}
         >
-          {category.nameInHebrew || category.name}
+          {language === 'ar' ? (category.nameInArabic || category.name) : category.name}
         </h2>
         <div className={`flex-1 h-1 ${colors.bgSimple} rounded-full`}></div>
       </div>
       <div className="overflow-x-auto pb-4 -mx-4 px-4 scrollbar-hide">
         <div className="flex gap-6 min-w-max">
           {items.length === 0 ? (
-            <div className="w-full min-w-full">
+              <div className="w-full min-w-full">
               <div className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm rounded-2xl p-12 text-center border-2 border-dashed border-gray-300 dark:border-gray-700">
                 <p className="text-gray-500 dark:text-gray-400 text-lg">
-                  עדיין אין פריטים בקטגוריה זו.
+                  {language === 'ar' ? 'لا توجد عناصر في هذه الفئة بعد.' : 'No items in this category yet.'}
                 </p>
               </div>
             </div>
@@ -66,18 +68,18 @@ export default function MenuSection({ category, items, onClick, isSelected = fal
                 <div className="p-6">
                   <div className="flex items-start justify-between mb-3">
                     <h3 className="text-xl font-bold text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                      {item.name}
+                      {language === 'ar' ? (item.nameInArabic || item.name) : item.name}
                     </h3>
                   </div>
                   <p className="text-gray-600 dark:text-gray-300 mb-5 text-sm leading-relaxed line-clamp-3">
-                    {item.description}
+                    {language === 'ar' ? (item.descriptionInArabic || item.description) : item.description}
                   </p>
                   <div className="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-gray-700">
                     <span className={`text-3xl font-extrabold ${colors.text}`}>
                       ₪{item.price.toFixed(2)}
                     </span>
                     <div className={`px-3 py-1 rounded-full text-xs font-semibold ${colors.bg} ${colors.text} border ${colors.border}`}>
-                      {category.nameInHebrew || category.name}
+                      {language === 'ar' ? (category.nameInArabic || category.name) : category.name}
                     </div>
                   </div>
                 </div>

@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "./contexts/AuthContext";
 import { MenuProvider } from "./contexts/MenuContext";
+import { LanguageProvider } from "./contexts/LanguageContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -15,8 +16,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ניהול תפריט מסעדה",
-  description: "נהל את תפריט המסעדה שלך בקלות",
+  title: "إدارة قائمة المطعم | Restaurant Menu Management",
+  description: "أدر قائمة مطعمك بسهولة | Manage your restaurant menu easily",
 };
 
 export default function RootLayout({
@@ -25,15 +26,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="he" dir="rtl">
+    <html lang="ar" dir="rtl">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <AuthProvider>
-          <MenuProvider>
-            {children}
-          </MenuProvider>
-        </AuthProvider>
+        <LanguageProvider>
+          <AuthProvider>
+            <MenuProvider>
+              {children}
+            </MenuProvider>
+          </AuthProvider>
+        </LanguageProvider>
       </body>
     </html>
   );

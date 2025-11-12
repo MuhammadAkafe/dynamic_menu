@@ -1,6 +1,9 @@
+'use client';
+
 import { CategoryName } from "../types";
 import { Category, MenuItem } from "../types";
 import { categories } from "../category";
+import { useLanguage } from "../contexts/LanguageContext";
 type FormData = {
     name: string;
     description: string;
@@ -18,6 +21,8 @@ interface AddAndEditProps {
 }
 
 export default function AddAndEdit({handleAdd, showAddForm, editingItem, formData, setFormData, handleSubmit, cancelForm}: AddAndEditProps) {
+    const { language } = useLanguage();
+    
     return(
         <>
                 <div className="mb-6">
@@ -28,7 +33,7 @@ export default function AddAndEdit({handleAdd, showAddForm, editingItem, formDat
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
-            הוסף פריט חדש
+            {language === 'ar' ? 'أضف عنصر جديد' : 'Add New Item'}
           </button>
         </div>
 
@@ -41,13 +46,13 @@ export default function AddAndEdit({handleAdd, showAddForm, editingItem, formDat
                 </svg>
               </div>
               <h2 className="text-2xl font-bold text-gray-800 dark:text-white">
-                {editingItem ? 'ערוך פריט' : 'הוסף פריט חדש'}
+                {editingItem ? (language === 'ar' ? 'تعديل العنصر' : 'Edit Item') : (language === 'ar' ? 'أضف عنصر جديد' : 'Add New Item')}
               </h2>
             </div>
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
                 <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                  שם הפריט
+                  {language === 'ar' ? 'اسم العنصر' : 'Item Name'}
                 </label>
                 <input
                   type="text"
@@ -57,12 +62,12 @@ export default function AddAndEdit({handleAdd, showAddForm, editingItem, formDat
                   }
                   required
                   className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white transition-all"
-                  placeholder="לדוגמה: עוף על האש"
+                  placeholder={language === 'ar' ? 'مثال: دجاج مشوي' : 'Example: Grilled Chicken'}
                 />
               </div>
               <div>
                 <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                  תיאור
+                  {language === 'ar' ? 'الوصف' : 'Description'}
                 </label>
                 <textarea
                   value={formData.description}
@@ -72,7 +77,7 @@ export default function AddAndEdit({handleAdd, showAddForm, editingItem, formDat
                   required
                   rows={3}
                   className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white transition-all resize-none"
-                  placeholder="תאר את הפריט..."
+                  placeholder={language === 'ar' ? 'اوصف العنصر...' : 'Describe the item...'}
                 />
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
@@ -97,7 +102,7 @@ export default function AddAndEdit({handleAdd, showAddForm, editingItem, formDat
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                    קטגוריה
+                    {language === 'ar' ? 'الفئة' : 'Category'}
                   </label>
                   <select
                     value={formData.category}
@@ -111,7 +116,7 @@ export default function AddAndEdit({handleAdd, showAddForm, editingItem, formDat
                     className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white transition-all appearance-none bg-white"
                   >
                     {categories.map((category: Category) => (
-                      <option key={category.id} value={category.name}>{category.nameInHebrew || category.name}</option>
+                      <option key={category.id} value={category.name}>{language === 'ar' ? (category.nameInArabic || category.name) : category.name}</option>
                     ))}
                   </select>
                 </div>
@@ -121,14 +126,14 @@ export default function AddAndEdit({handleAdd, showAddForm, editingItem, formDat
                   type="submit"
                   className="flex-1 px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:from-indigo-700 hover:to-purple-700 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95"
                 >
-                  {editingItem ? 'עדכן פריט' : 'הוסף פריט'}
+                  {editingItem ? (language === 'ar' ? 'تحديث العنصر' : 'Update Item') : (language === 'ar' ? 'أضف العنصر' : 'Add Item')}
                 </button>
                 <button
                   type="button"
                   onClick={cancelForm}
                   className="px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-300 dark:hover:bg-gray-600 transition-all duration-200 font-semibold"
                 >
-                  ביטול
+                  {language === 'ar' ? 'إلغاء' : 'Cancel'}
                 </button>
               </div>
             </form>

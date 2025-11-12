@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 
 async function main() {
   console.log('Seeding database...');
-
+   await prisma.user.deleteMany();
   // Create admin user
   const hashedPassword = await bcrypt.hash('admin123', 10);
   const admin = await prisma.user.upsert({
@@ -17,6 +17,8 @@ async function main() {
     },
   });
 }
+
+
 
 main()
   .catch((e) => {

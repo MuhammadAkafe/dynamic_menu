@@ -4,16 +4,16 @@ export const categories: Category[] = [
     {
         id: 1,
         name: 'Grill',
-        nameInHebrew: 'גריל',
+        nameInArabic: 'جريل',
     },
     {
         id: 2,
         name: 'Salads',
-        nameInHebrew: 'סלטים',
+        nameInArabic: 'سلطات',
     },
     {
         id: 3,
         name: 'Drinks',
-        nameInHebrew: 'משקאות',
+        nameInArabic: 'مشروبات',
     },
 ] 

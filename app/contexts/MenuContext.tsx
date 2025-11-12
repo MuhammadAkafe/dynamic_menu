@@ -40,6 +40,7 @@ export function MenuProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     fetchMenuItems();
   }, []);
+  
 
   const addItem = async (item: Omit<MenuItem, 'id'>) => {
     try {

@@ -5,6 +5,7 @@ import { useMenu } from './contexts/MenuContext';
 import MenuSection from './components/MenuSection';
 import { useRouter } from 'next/navigation';
 import { useAuth } from './contexts/AuthContext';
+import { useLanguage } from './contexts/LanguageContext';
 import { Category, CategoryName } from './types';
 import { categories } from './category';
 
@@ -40,6 +41,7 @@ interface CategoryCardProps {
 
 function CategoryCard({ category, itemCount, onClick }: CategoryCardProps) {
   const colors = categoryColors[category.name as CategoryName];
+  const { language } = useLanguage();
 
   return (
     <button
@@ -50,13 +52,13 @@ function CategoryCard({ category, itemCount, onClick }: CategoryCardProps) {
       <div className="relative z-10">
         <div className="text-5xl mb-4">{colors.icon}</div>
         <h2 className={`text-3xl font-extrabold ${colors.text} mb-2`}>
-          {category.nameInHebrew || category.name}
+          {language === 'ar' ? category.nameInArabic : category.name}
         </h2>
         <p className="text-gray-600 dark:text-gray-400 text-sm">
-          {itemCount} {itemCount === 1 ? 'פריט' : 'פריטים'} זמינים
+          {itemCount} {language === 'ar' ? (itemCount === 1 ? 'عنصر' : 'عناصر') : (itemCount === 1 ? 'item' : 'items')} {language === 'ar' ? 'متاح' : 'available'}
         </p>
         <div className="mt-4 flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300 group-hover:translate-x-2 transition-transform">
-          <span>צפה בתפריט</span>
+          <span>{language === 'ar' ? 'عرض القائمة' : 'View Menu'}</span>
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
@@ -69,6 +71,7 @@ function CategoryCard({ category, itemCount, onClick }: CategoryCardProps) {
 export default function Home() {
   const { getItemsByCategory } = useMenu();
   const { isAuthenticated } = useAuth();
+  const { language, toggleLanguage } = useLanguage();
   const router = useRouter();
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
 
@@ -78,12 +81,24 @@ export default function Home() {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-16">
           <div>
             <h1 className="text-5xl sm:text-6xl font-extrabold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-2">
-              תפריט מסעדה
+              {language === 'ar' ? 'قائمة المطعم' : 'Restaurant Menu'}
             </h1>
             <p className="text-gray-600 dark:text-gray-400 text-lg">
-              גלה את המנות הטעימות שלנו
+              {language === 'ar' ? 'اكتشف أطباقنا اللذيذة' : 'Discover our delicious dishes'}
             </p>
           </div>
+
+          <div className="flex items-center gap-3">
+            <button
+              onClick={toggleLanguage}
+              className="px-4 py-2 bg-indigo-100 dark:bg-indigo-900/30 hover:bg-indigo-200 dark:hover:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 rounded-lg transition-all duration-200 font-semibold text-sm flex items-center gap-2 shadow-md hover:shadow-lg transform hover:scale-105 active:scale-95"
+              title={language === 'ar' ? 'Switch to English' : 'التبديل إلى العربية'}
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+              </svg>
+              {language === 'ar' ? 'English' : 'العربية'}
+            </button>
 
           {isAuthenticated ? (
             <button
@@ -94,7 +109,7 @@ export default function Home() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
-              לוח בקרה
+              {language === 'ar' ? 'لوحة التحكم' : 'Dashboard'}
             </button>
           ) : (
             <button
@@ -104,9 +119,10 @@ export default function Home() {
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
               </svg>
-              התחברות מנהל
+              {language === 'ar' ? 'تسجيل دخول المدير' : 'Admin Login'}
             </button>
           )}
+          </div>
 
           
         </div>
@@ -116,7 +132,7 @@ export default function Home() {
             <div className="mb-8 flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <span className="text-gray-600 dark:text-gray-400">
-                  מציג: <span className="font-bold text-indigo-600 dark:text-indigo-400">{selectedCategory ? (selectedCategory.nameInHebrew || selectedCategory.name) : ''}</span>
+                  {language === 'ar' ? 'عرض:' : 'Showing:'} <span className="font-bold text-indigo-600 dark:text-indigo-400">{selectedCategory ? (selectedCategory.nameInArabic || selectedCategory.name) : ''}</span>
                 </span>
               </div>
               <button
@@ -126,7 +142,7 @@ export default function Home() {
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                 </svg>
-                חזור לקטגוריות
+                {language === 'ar' ? 'العودة إلى الفئات' : 'Back to Categories'}
               </button>
             </div>
             <MenuSection 

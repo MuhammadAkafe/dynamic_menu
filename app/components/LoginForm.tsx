@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { useRouter } from 'next/navigation';
 
 export default function LoginForm() {
@@ -9,6 +10,7 @@ export default function LoginForm() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const { login } = useAuth();
+  const { language } = useLanguage();
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -16,7 +18,7 @@ export default function LoginForm() {
     setError('');
 
     if (!email || !password) {
-      setError('אנא הזן אימייל וסיסמה');
+      setError(language === 'ar' ? 'يرجى إدخال البريد الإلكتروني وكلمة المرور' : 'Please enter email and password');
       return;
     }
 
@@ -24,7 +26,7 @@ export default function LoginForm() {
     if (success) {
       router.push('/admin');
     } else {
-      setError('פרטי התחברות לא תקינים');
+      setError(language === 'ar' ? 'بيانات تسجيل الدخول غير صحيحة' : 'Invalid login credentials');
     }
   };
 
@@ -43,7 +45,7 @@ export default function LoginForm() {
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
-            <span className="text-sm font-medium">חזרה לדף הבית</span>
+            <span className="text-sm font-medium">{language === 'ar' ? 'العودة إلى الصفحة الرئيسية' : 'Back to Home'}</span>
           </button>
           <div className="text-center mb-8">
             <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl mb-4 shadow-lg">
@@ -52,10 +54,10 @@ export default function LoginForm() {
               </svg>
             </div>
             <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white mb-2">
-              התחברות מנהל
+              {language === 'ar' ? 'تسجيل دخول المدير' : 'Admin Login'}
             </h1>
             <p className="text-gray-600 dark:text-gray-400 text-sm">
-              נהל את תפריט המסעדה שלך
+              {language === 'ar' ? 'أدر قائمة مطعمك' : 'Manage your restaurant menu'}
             </p>
           </div>
           <form onSubmit={handleSubmit} className="space-y-5">
@@ -64,7 +66,7 @@ export default function LoginForm() {
                 htmlFor="email"
                 className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2"
               >
-                כתובת אימייל
+                {language === 'ar' ? 'عنوان البريد الإلكتروني' : 'Email Address'}
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -87,7 +89,7 @@ export default function LoginForm() {
                 htmlFor="password"
                 className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2"
               >
-                סיסמה
+                {language === 'ar' ? 'كلمة المرور' : 'Password'}
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -101,7 +103,7 @@ export default function LoginForm() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white transition-all"
-                  placeholder="הזן את הסיסמה שלך"
+                  placeholder={language === 'ar' ? 'أدخل كلمة المرور' : 'Enter your password'}
                 />
               </div>
             </div>
@@ -114,7 +116,7 @@ export default function LoginForm() {
               type="submit"
               className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3.5 px-4 rounded-xl hover:from-indigo-700 hover:to-purple-700 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98]"
             >
-              התחבר
+              {language === 'ar' ? 'تسجيل الدخول' : 'Login'}
             </button>
           </form>
         </div>

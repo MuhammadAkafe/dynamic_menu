@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useMenu } from '../contexts/MenuContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { MenuItem, CategoryName } from '../types';
 import { useRouter } from 'next/navigation';
 import { categories } from '../category';
@@ -11,6 +12,7 @@ import AddAndEdit from './AddAndEdit';
 export default function AdminPanel() {
   const { logout } = useAuth();
   const { menuItems, addItem, updateItem, deleteItem } = useMenu();
+  const { language } = useLanguage();
   const router = useRouter();
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
@@ -49,11 +51,17 @@ export default function AdminPanel() {
   };
 
   const handleDelete = async (id: string) => {
-    if (confirm('האם אתה בטוח שברצונך למחוק פריט זה?')) {
+    const confirmMessage = language === 'ar' 
+      ? 'هل أنت متأكد أنك تريد حذف هذا العنصر؟'
+      : 'Are you sure you want to delete this item?';
+    if (confirm(confirmMessage)) {
       try {
         await deleteItem(id);
       } catch {
-        alert('נכשל במחיקת הפריט. אנא נסה שוב.');
+        const errorMessage = language === 'ar'
+          ? 'فشل في حذف العنصر. يرجى المحاولة مرة أخرى.'
+          : 'Failed to delete item. Please try again.';
+        alert(errorMessage);
       }
     }
   };
@@ -62,14 +70,20 @@ export default function AdminPanel() {
     e.preventDefault();
     const price = parseFloat(formData.price);
     if (isNaN(price) || price <= 0) {
-      alert('אנא הזן מחיר תקין');
+      const errorMessage = language === 'ar'
+        ? 'يرجى إدخال سعر صحيح'
+        : 'Please enter a valid price';
+      alert(errorMessage);
       return;
     }
 
     try {
       const selectedCategory = categories.find(cat => cat.name === formData.category);
       if (!selectedCategory) {
-        alert('אנא בחר קטגוריה תקינה');
+        const errorMessage = language === 'ar'
+          ? 'يرجى اختيار فئة صحيحة'
+          : 'Please select a valid category';
+        alert(errorMessage);
         return;
       }
 
@@ -98,7 +112,10 @@ export default function AdminPanel() {
       setEditingItem(null);
       setShowAddForm(false);
     } catch {
-      alert('נכשל בשמירת הפריט. אנא נסה שוב.');
+      const errorMessage = language === 'ar'
+        ? 'فشل في حفظ العنصر. يرجى المحاولة مرة أخرى.'
+        : 'Failed to save item. Please try again.';
+      alert(errorMessage);
     }
   };
 
@@ -119,10 +136,10 @@ export default function AdminPanel() {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
           <div>
             <h1 className="text-4xl sm:text-5xl font-extrabold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-2">
-              לוח בקרה
+              {language === 'ar' ? 'لوحة التحكم' : 'Dashboard'}
             </h1>
             <p className="text-gray-600 dark:text-gray-400">
-              נהל את תפריט המסעדה שלך
+              {language === 'ar' ? 'أدر قائمة مطعمك' : 'Manage your restaurant menu'}
             </p>
           </div>
           <div className="flex gap-3">
@@ -134,7 +151,7 @@ export default function AdminPanel() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
               </svg>
-              צפה בתפריט
+              {language === 'ar' ? 'عرض القائمة' : 'View Menu'}
             </button>
             <button
               onClick={handleLogout}
@@ -143,7 +160,7 @@ export default function AdminPanel() {
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
               </svg>
-              התנתק
+              {language === 'ar' ? 'تسجيل الخروج' : 'Logout'}
             </button>
           </div>
         </div>
@@ -157,7 +174,7 @@ export default function AdminPanel() {
               <svg className="w-6 h-6 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
               </svg>
-              כל פריטי התפריט
+              {language === 'ar' ? 'جميع عناصر القائمة' : 'All Menu Items'}
             </h2>
           </div>
           <div className="overflow-x-auto">
@@ -165,19 +182,19 @@ export default function AdminPanel() {
               <thead className="bg-gray-50 dark:bg-gray-700/50">
                 <tr>
                   <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
-                    שם
+                    {language === 'ar' ? 'الاسم' : 'Name'}
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
-                    תיאור
+                    {language === 'ar' ? 'الوصف' : 'Description'}
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
-                    קטגוריה
+                    {language === 'ar' ? 'الفئة' : 'Category'}
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
-                    מחיר
+                    {language === 'ar' ? 'السعر' : 'Price'}
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
-                    פעולות
+                    {language === 'ar' ? 'الإجراءات' : 'Actions'}
                   </th>
                 </tr>
               </thead>
@@ -195,7 +212,7 @@ export default function AdminPanel() {
                           </svg>
                         </div>
                         <p className="text-gray-500 dark:text-gray-400 font-medium">
-                          עדיין אין פריטי תפריט. הוסף את הפריט הראשון שלך!
+                          {language === 'ar' ? 'لا توجد عناصر قائمة بعد. أضف العنصر الأول!' : 'No menu items yet. Add your first item!'}
                         </p>
                       </div>
                     </td>
@@ -224,7 +241,7 @@ export default function AdminPanel() {
                             ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'
                             : 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300'
                         }`}>
-                          {item.category.nameInHebrew || item.category.name}
+                          {language === 'ar' ? (item.category.nameInArabic || item.category.name) : item.category.name}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -241,7 +258,7 @@ export default function AdminPanel() {
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                             </svg>
-                            ערוך
+                            {language === 'ar' ? 'تعديل' : 'Edit'}
                           </button>
                           <button
                             onClick={() => handleDelete(item.id)}
@@ -250,7 +267,7 @@ export default function AdminPanel() {
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                             </svg>
-                            מחק
+                            {language === 'ar' ? 'حذف' : 'Delete'}
                           </button>
                         </div>
                       </td>
