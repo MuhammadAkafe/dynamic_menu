@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useRef, useEffect } from 'react';
 import { Category, MenuItem } from "../types";
 import { useCategory } from "../contexts/CategoryContext";
 import { useLanguage } from "../contexts/LanguageContext";
@@ -8,6 +9,7 @@ type FormData = {
     description: string;
     price: string;
     categoryId: string;
+    imageUrl: string;
 }
 interface AddAndEditProps {
     handleAdd: () => void;
@@ -22,6 +24,66 @@ interface AddAndEditProps {
 export default function AddAndEdit({handleAdd, showAddForm, editingItem, formData, setFormData, handleSubmit, cancelForm}: AddAndEditProps) {
     const { language } = useLanguage();
     const { categories } = useCategory();
+    const [isDragging, setIsDragging] = useState(false);
+    const [imagePreview, setImagePreview] = useState<string | null>(formData.imageUrl || null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const handleImageChange = (file: File) => {
+        if (file && file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                const result = reader.result as string;
+                setImagePreview(result);
+                setFormData({ ...formData, imageUrl: result });
+            };
+            reader.readAsDataURL(file);
+        } else {
+            alert(language === 'ar' ? 'الرجاء اختيار ملف صورة صحيح' : 'Please select a valid image file');
+        }
+    };
+
+    const handleDragOver = (e: React.DragEvent) => {
+        e.preventDefault();
+        setIsDragging(true);
+    };
+
+    const handleDragLeave = (e: React.DragEvent) => {
+        e.preventDefault();
+        setIsDragging(false);
+    };
+
+    const handleDrop = (e: React.DragEvent) => {
+        e.preventDefault();
+        setIsDragging(false);
+        const file = e.dataTransfer.files[0];
+        if (file) {
+            handleImageChange(file);
+        }
+    };
+
+    const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            handleImageChange(file);
+        }
+    };
+
+    const removeImage = () => {
+        setImagePreview(null);
+        setFormData({ ...formData, imageUrl: '' });
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+        }
+    };
+
+    // Update preview when editingItem changes
+    useEffect(() => {
+        if (editingItem?.imageUrl) {
+            setImagePreview(editingItem.imageUrl);
+        } else if (!editingItem) {
+            setImagePreview(null);
+        }
+    }, [editingItem]);
     
     return(
         <>
@@ -102,6 +164,69 @@ export default function AddAndEdit({handleAdd, showAddForm, editingItem, formDat
                       className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white transition-all resize-none"
                       placeholder={language === 'ar' ? 'اوصف العنصر...' : 'Describe the item...'}
                     />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                      {language === 'ar' ? 'صورة العنصر' : 'Item Image'}
+                    </label>
+                    {imagePreview ? (
+                      <div className="relative">
+                        <img
+                          src={imagePreview}
+                          alt="Preview"
+                          className="w-full h-48 object-cover rounded-xl border-2 border-gray-200 dark:border-gray-700"
+                        />
+                        <button
+                          type="button"
+                          onClick={removeImage}
+                          className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-2 hover:bg-red-600 transition-colors"
+                          aria-label={language === 'ar' ? 'إزالة الصورة' : 'Remove image'}
+                        >
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      </div>
+                    ) : (
+                      <div
+                        onDragOver={handleDragOver}
+                        onDragLeave={handleDragLeave}
+                        onDrop={handleDrop}
+                        className={`border-2 border-dashed rounded-xl p-8 text-center transition-all cursor-pointer ${
+                          isDragging
+                            ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20'
+                            : 'border-gray-300 dark:border-gray-600 hover:border-indigo-400 dark:hover:border-indigo-500'
+                        }`}
+                        onClick={() => fileInputRef.current?.click()}
+                      >
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          accept="image/*"
+                          onChange={handleFileInput}
+                          className="hidden"
+                        />
+                        <svg
+                          className="w-12 h-12 mx-auto text-gray-400 dark:text-gray-500 mb-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                          />
+                        </svg>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                          {language === 'ar' ? 'اسحب وأفلت الصورة هنا أو انقر للاختيار' : 'Drag and drop an image here, or click to select'}
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-gray-500">
+                          {language === 'ar' ? 'PNG, JPG, GIF حتى 10MB' : 'PNG, JPG, GIF up to 10MB'}
+                        </p>
+                      </div>
+                    )}
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     <div>

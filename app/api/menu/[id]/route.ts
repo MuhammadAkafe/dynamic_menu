@@ -6,7 +6,7 @@ import { Category } from '../../../types';
 export async function PUT(request: NextRequest,{ params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
-    const { name, description, price, category } = await request.json();
+    const { name, description, price, category, imageUrl } = await request.json();
 
     if (!name || !description || !price || !category) {
       return NextResponse.json(
@@ -48,6 +48,7 @@ export async function PUT(request: NextRequest,{ params }: { params: Promise<{ i
         description: String(description).trim(),
         price: parsedPrice,
         categoryId: categoryId,
+        imageUrl: imageUrl !== undefined ? (imageUrl ? String(imageUrl).trim() : null) : undefined,
       },
       include: {
         category: true,
@@ -59,6 +60,7 @@ export async function PUT(request: NextRequest,{ params }: { params: Promise<{ i
       name: menuItem.name,
       description: menuItem.description,
       price: menuItem.price,
+      imageUrl: menuItem.imageUrl,
       category: {
         id: menuItem.category.id,
         name: menuItem.category.name,

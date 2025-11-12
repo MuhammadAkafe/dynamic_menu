@@ -35,6 +35,7 @@ export default function AdminPanel() {
     description: '',
     price: '',
     categoryId: '',
+    imageUrl: '',
   });
 
   const handleLogout = () => {
@@ -51,6 +52,7 @@ export default function AdminPanel() {
       description: '',
       price: '',
       categoryId: categories.length > 0 ? categories[0].id : '',
+      imageUrl: '',
     });
   };
 
@@ -75,6 +77,7 @@ export default function AdminPanel() {
       description: item.description,
       price: item.price.toString(),
       categoryId: item.category.id,
+      imageUrl: item.imageUrl || '',
     });
   };
 
@@ -121,6 +124,7 @@ export default function AdminPanel() {
           description: formData.description,
           price: price,
           category: selectedCategory,
+          imageUrl: formData.imageUrl || undefined,
         });
       } else {
         await addItem({
@@ -128,6 +132,7 @@ export default function AdminPanel() {
           description: formData.description,
           price: price,
           category: selectedCategory,
+          imageUrl: formData.imageUrl || undefined,
         });
       }
 
@@ -136,6 +141,7 @@ export default function AdminPanel() {
         description: '',
         price: '',
         categoryId: categories.length > 0 ? categories[0].id : '',
+        imageUrl: '',
       });
       setEditingItem(null);
       setShowAddForm(false);
@@ -153,6 +159,7 @@ export default function AdminPanel() {
       description: '',
       price: '',
       categoryId: categories.length > 0 ? categories[0].id : '',
+      imageUrl: '',
     });
     setEditingItem(null);
     setShowAddForm(false);

@@ -20,6 +20,7 @@ export async function GET() {
       name: item.name,
       description: item.description,
       price: item.price,
+      imageUrl: item.imageUrl,
       category: {
         id: item.category.id,
         name: item.category.name,
@@ -42,7 +43,7 @@ export async function GET() {
 // POST - Create a new menu item
 export async function POST(request: NextRequest) {
   try {
-    const { name, description, price, category } = await request.json();
+    const { name, description, price, category, imageUrl } = await request.json();
 
     if (!name || !description || !price || !category) {
       return NextResponse.json(
@@ -83,6 +84,7 @@ export async function POST(request: NextRequest) {
         description: String(description).trim(),
         price: parsedPrice,
         categoryId: categoryId,
+        imageUrl: imageUrl ? String(imageUrl).trim() : null,
       },
       include: {
         category: true,
@@ -94,6 +96,7 @@ export async function POST(request: NextRequest) {
       name: menuItem.name,
       description: menuItem.description,
       price: menuItem.price,
+      imageUrl: menuItem.imageUrl,
       category: {
         id: menuItem.category.id,
         name: menuItem.category.name,
